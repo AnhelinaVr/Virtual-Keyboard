@@ -654,7 +654,7 @@ wrapper.appendChild(keyboard);
 const description = document.createElement("p");
 description.classList.add("description");
 description.innerHTML +=
-    "Смена раскладки: Ctrl + Alt <br>" +
+    "Смена раскладки: кнопка \"EN\"/\"RU\" ИЛИ Ctrl + Alt<br>" +
     "Клавиатура создана в операционной системе Windows";
 wrapper.appendChild(description);
 
@@ -1184,6 +1184,7 @@ function keyClick(event) {
 
 hideKeyboard.onclick = function() {
     keyboard.classList.toggle('keyboard--hidden');
+    description.classList.toggle('description--hidden');
 }
 
 function playSound(event, langEn, state) {

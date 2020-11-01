@@ -19,6 +19,10 @@
     font-size: 20px;
 }
 
+.description--hidden {
+    visibility: hidden;
+}
+
 .keyboard {
     position: fixed;
     bottom: 5%;
