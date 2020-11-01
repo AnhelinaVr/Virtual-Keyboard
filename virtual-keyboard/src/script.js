@@ -591,13 +591,13 @@ const KEYBOARD = [{
 
     {
         print: false,
-        text: { en: "Alt", ru: "Alt" },
-        capslock: { en: "Alt", ru: "Alt" },
+        text: { en: "", ru: "" },
+        capslock: { en: "", ru: "" },
         shift: {
-            isCaps: { en: "Alt", ru: "Alt" },
-            notCaps: { en: "Alt", ru: "Alt" },
+            isCaps: { en: "", ru: "" },
+            notCaps: { en: "", ru: "" },
         },
-        code: "AltRight",
+        code: "Sound",
     },
     {
         print: false,
@@ -631,30 +631,25 @@ const KEYBOARD = [{
     },
     {
         print: false,
-        text: { en: "M", ru: "Mr" },
-        capslock: { en: "M", ru: "Mr" },
+        text: { en: "", ru: "" },
+        capslock: { en: "", ru: "" },
         shift: {
-            isCaps: { en: "M", ru: "Mr" },
-            notCaps: { en: "M", ru: "Mr" },
+            isCaps: { en: "", ru: "" },
+            notCaps: { en: "", ru: "" },
         },
         code: "Micro",
     },
 ];
 // create html elements
-const wrapper = document.createElement("div");
-document.body.appendChild(wrapper);
-wrapper.classList.add("wrapper");
-const title = document.createElement("p");
-wrapper.appendChild(title);
-title.classList.add("title");
-title.textContent += "Virtual keyboard";
-const textarea = document.createElement("textarea");
-wrapper.appendChild(textarea);
-textarea.classList.add("screen");
-textarea.cols = 50;
-textarea.rows = 5;
+const wrapper = document.querySelector('.wrapper');
+
+const textarea = document.querySelector(".screen");
+
+const hideKeyboard = document.querySelector('.hideKeyboard__btn');
+
 const keyboard = document.createElement("div");
 keyboard.classList.add("keyboard");
+keyboard.classList.add("keyboard--hidden");
 wrapper.appendChild(keyboard);
 const description = document.createElement("p");
 description.classList.add("description");
@@ -667,6 +662,7 @@ let isCaps = false;
 let isShift = false;
 let langEn = true;
 let microOn = false;
+let stateVolume = true;
 
 window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
@@ -704,10 +700,27 @@ function capslockActive(isCaps) {
         ?
         document
         .querySelector('.keyboard-key[data-code="CapsLock"]')
-        .classList.add("active") :
+        .classList.add("active-special") :
         document
         .querySelector('.keyboard-key[data-code="CapsLock"]')
-        .classList.remove("active");
+        .classList.remove("active-special");
+}
+
+function shiftActive(isShift) {
+    if (isShift) {
+        document
+            .querySelector('.keyboard-key[data-code="ShiftLeft"]')
+            .classList.add("active-special");
+        document
+            .querySelector('.keyboard-key[data-code="ShiftRight"]')
+            .classList.add("active-special");
+    } else {
+        document.querySelector('.keyboard-key[data-code="ShiftLeft"]')
+            .classList.remove("active-special");
+        document
+            .querySelector('.keyboard-key[data-code="ShiftRight"]')
+            .classList.remove("active-special");
+    }
 }
 
 function moveCursor(direction, cursorPosition) {
@@ -779,6 +792,29 @@ function keyboardDraw(langEn) {
         keyboard.innerHTML = out;
     }
     capslockActive(isCaps);
+    shiftActive(isShift);
+    addIcons();
+}
+
+function addIcons() {
+    document
+        .querySelector(`.keyboard-key[data-code="Micro"]`)
+        .classList.add("fa");
+    document
+        .querySelector(`.keyboard-key[data-code="Micro"]`)
+        .classList.add("fa-microphone");
+    document
+        .querySelector(`.keyboard-key[data-code="Micro"]`)
+        .classList.add("fa-2x");
+    document
+        .querySelector(`.keyboard-key[data-code="Sound"]`)
+        .classList.add("fa-2x");
+    document
+        .querySelector(`.keyboard-key[data-code="Sound"]`)
+        .classList.add("fa");
+    document
+        .querySelector(`.keyboard-key[data-code="Sound"]`)
+        .classList.add("fa-volume-up");
 }
 
 function keyboardDrawCapsLock(langEn) {
@@ -822,6 +858,8 @@ function keyboardDrawCapsLock(langEn) {
     }
     keyboard.innerHTML = out;
     capslockActive(isCaps);
+    shiftActive(isShift);
+    addIcons();
 }
 
 function keyboardDrawSHIFT(langEn) {
@@ -900,7 +938,10 @@ function keyboardDrawSHIFT(langEn) {
     }
     keyboard.innerHTML = out;
     capslockActive(isCaps);
+    shiftActive(isShift);
+    addIcons();
 }
+
 
 function specialKeys(event) {
     event.code = event.code || event.target.dataset.code;
@@ -916,10 +957,26 @@ function specialKeys(event) {
     if (event.code === 'Micro') {
         document
             .querySelector(`.keyboard-key[data-code="${event.code}"]`)
-            .classList.toggle("active");
+            .classList.toggle("active-special");
+        document
+            .querySelector(`.keyboard-key[data-code="${event.code}"]`)
+            .classList.toggle("fa-microphone-slash");
+        document
+            .querySelector(`.keyboard-key[data-code="${event.code}"]`)
+            .classList.toggle("fa-microphone");
+
         langEn ? recognition.lang = 'en-US' : recognition.lang = 'ru-RU';
         microOn ? microOn = false : microOn = true;
         microOn ? recognition.start() : recognition.stop();
+    }
+    if (event.code === 'Sound') {
+        document
+            .querySelector(`.keyboard-key[data-code="${event.code}"]`)
+            .classList.toggle("fa-volume-off");
+        document
+            .querySelector(`.keyboard-key[data-code="${event.code}"]`)
+            .classList.toggle("fa-volume-up");
+        stateVolume ? stateVolume = false : stateVolume = true;
     }
     switch (event.code) {
         case "CapsLock":
@@ -935,17 +992,14 @@ function specialKeys(event) {
             break;
         case "ShiftLeft":
         case "ShiftRight":
-            document
-                .querySelector(`.keyboard-key[data-code="${event.code}"]`)
-                .classList.toggle("active");
             if (!isShift) {
                 isShift = true;
                 keyboardDrawSHIFT(langEn);
-
+                shiftActive(isShift);
             } else {
                 isShift = false;
                 keyboardDraw(langEn);
-
+                shiftActive(isShift);
             }
             break;
         case "Tab":
@@ -1070,6 +1124,8 @@ window.onload = () => {
 
 document.onkeydown = function(event) {
     event.preventDefault();
+    textarea.scrollTop = textarea.scrollHeight;
+    playSound(event, langEn, stateVolume);
     if (!event.repeat) {
         document
             .querySelector(`.keyboard-key[data-code="${event.code}"]`)
@@ -1088,20 +1144,11 @@ document.onkeydown = function(event) {
     }
 };
 
-// document.onkeyup = function(event) {
-//     document
-//         .querySelector(`.keyboard-key[data-code="${event.code}"]`)
-//         .classList.remove("active");
-//     if (event.code === "ShiftLeft" || event.code === "ShiftRight") {
-//         isShift = false;
-//         isCaps ? keyboardDrawCapsLock(langEn) : keyboardDraw(langEn);
-//         // document
-//         //     .querySelector(
-//         //         `.keyboard-key[data-code="${event.code}"]`
-//         //     )
-//         //     .classList.remove("active");
-//     }
-// };
+document.onkeyup = function(event) {
+    document
+        .querySelector(`.keyboard-key[data-code="${event.code}"]`)
+        .classList.remove("active");
+};
 
 function keyClick(event) {
     if (event.target.tagName === "SUB") {
@@ -1116,5 +1163,32 @@ function keyClick(event) {
             .addEventListener("animationend", function() {
                 this.classList.remove("active-click");
             });
+    }
+}
+
+hideKeyboard.onclick = function() {
+    keyboard.classList.toggle('keyboard--hidden');
+}
+
+function playSound(event, langEn, state) {
+    if (!state) return;
+    const audio = document.querySelectorAll(`audio`);
+    if (!audio) return;
+    if (KEYBOARD.find((elem) => elem.code === event.code).print === true) {
+        if (langEn) {
+            audio[1].currentTime = 0;
+            audio[1].play();
+        } else {
+            audio[0].currentTime = 0;
+            audio[0].play();
+        }
+    } else {
+        if (langEn) {
+            audio[0].currentTime = 0;
+            audio[0].play();
+        } else {
+            audio[1].currentTime = 0;
+            audio[1].play();
+        }
     }
 }
