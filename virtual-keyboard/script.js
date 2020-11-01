@@ -822,7 +822,7 @@ function keyboardDrawCapsLock(langEn) {
     for (let i = 0; i < KEYBOARD.length; i++) {
         if (i === 14 || i === 29 || i === 42 || i === 55)
             out += '<div class="clear"></div>';
-        if (langEn) {
+        if (langEn && !isShift) {
             if (
                 (i >= 0 && i < 12) ||
                 (i > 14 && i < 27) ||
@@ -832,13 +832,29 @@ function keyboardDrawCapsLock(langEn) {
                 out +=
                     '<div class="keyboard-key" onclick="keyClick(event)"' +
                     `data-code="${KEYBOARD[i].code}">
-                    ${KEYBOARD[i].capslock.en}${KEYBOARD[
-            i
-          ].shift.notCaps.ru.sub()}</div>`;
+                    ${KEYBOARD[i].capslock.en}
+                    ${KEYBOARD[i].shift.notCaps.ru.sub()}</div>`;
             } else {
                 out +=
                     '<div class="keyboard-key" onclick="keyClick(event)"' +
                     `data-code="${KEYBOARD[i].code}">${KEYBOARD[i].capslock.en}</div>`;
+            }
+        } else if (langEn && isShift) {
+            if (
+                i === 0 ||
+                (i > 14 && i < 27) ||
+                (i > 29 && i < 41) ||
+                (i > 42 && i < 53)
+            ) {
+                out +=
+                    '<div class="keyboard-key" onclick="keyClick(event)"' +
+                    `data-code="${KEYBOARD[i].code}">
+                    ${KEYBOARD[i].shift.isCaps.en}
+                    ${KEYBOARD[i].shift.isCaps.ru.sub()}</div>`;
+            } else {
+                out +=
+                    '<div class="keyboard-key" onclick="keyClick(event)"' +
+                    `data-code="${KEYBOARD[i].code}">${KEYBOARD[i].shift.isCaps.en}</div>`;
             }
         } else if (
             (i >= 0 && i < 12) ||
@@ -869,7 +885,7 @@ function keyboardDrawSHIFT(langEn) {
             out += '<div class="clear"></div>';
         if (langEn && isCaps) {
             if (
-                (i >= 0 && i < 12) ||
+                i === 0 ||
                 (i > 14 && i < 27) ||
                 (i > 29 && i < 41) ||
                 (i > 42 && i < 53)
@@ -894,9 +910,8 @@ function keyboardDrawSHIFT(langEn) {
                 out +=
                     '<div class="keyboard-key" onclick="keyClick(event)"' +
                     `data-code="${KEYBOARD[i].code}">
-                ${KEYBOARD[i].shift.isCaps.ru}${KEYBOARD[
-            i
-          ].shift.isCaps.en.sub()}</div>`;
+                ${KEYBOARD[i].shift.isCaps.ru}
+                ${KEYBOARD[i].shift.isCaps.en.sub()}</div>`;
             } else {
                 out +=
                     '<div class="keyboard-key" onclick="keyClick(event)"' +
@@ -986,7 +1001,8 @@ function specialKeys(event) {
                 capslockActive(isCaps);
             } else {
                 isCaps = false;
-                keyboardDraw(langEn);
+                isShift ? keyboardDrawSHIFT(langEn) : keyboardDraw(langEn);
+
                 capslockActive(isCaps);
             }
             break;
@@ -998,7 +1014,7 @@ function specialKeys(event) {
                 shiftActive(isShift);
             } else {
                 isShift = false;
-                keyboardDraw(langEn);
+                isCaps ? keyboardDrawCapsLock(langEn) : keyboardDraw(langEn);
                 shiftActive(isShift);
             }
             break;
