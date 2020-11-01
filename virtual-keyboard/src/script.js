@@ -1047,14 +1047,22 @@ function specialKeys(event) {
 }
 
 function findKey(event) {
-    event.code = event.code || event.target.dataset.code;
+    if (event.target.tagName === "SUB") {
+        event.code = event.currentTarget.dataset.code
+    } else {
+        event.code = event.code || event.target.dataset.code;
+    }
     const key = KEYBOARD.find((elem) => elem.code === event.code);
     if (key.print) return key;
     specialKeys(event);
 }
 
 function keyHandler(event) {
-    event.code = event.code || event.target.dataset.code;
+    if (event.target.tagName === "SUB") {
+        event.code = event.currentTarget.dataset.code
+    } else {
+        event.code = event.code || event.target.dataset.code;
+    }
     const key = findKey(event);
     if (key) {
         textarea.focus();
@@ -1151,10 +1159,17 @@ document.onkeyup = function(event) {
 };
 
 function keyClick(event) {
+    keyHandler(event);
     if (event.target.tagName === "SUB") {
-        console.log("bug");
+        document
+            .querySelector(`.keyboard-key[data-code="${event.currentTarget.dataset.code}"]`)
+            .classList.add("active-click");
+        document
+            .querySelector(`.keyboard-key[data-code="${event.currentTarget.dataset.code}"]`)
+            .addEventListener("animationend", function() {
+                this.classList.remove("active-click");
+            });
     } else {
-        keyHandler(event);
         document
             .querySelector(`.keyboard-key[data-code="${event.target.dataset.code}"]`)
             .classList.add("active-click");
@@ -1164,6 +1179,7 @@ function keyClick(event) {
                 this.classList.remove("active-click");
             });
     }
+    playSound(event, langEn, stateVolume);
 }
 
 hideKeyboard.onclick = function() {
